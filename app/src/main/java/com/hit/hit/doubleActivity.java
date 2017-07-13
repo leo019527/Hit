@@ -1,18 +1,39 @@
 package com.hit.hit;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ListView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
 public class doubleActivity extends AppCompatActivity {
+
+    //蓝牙相关变量
+    private BluetoothAdapter BA;
+    private Set<BluetoothDevice>pairedDevices;
+    private ListView lv;
+
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -106,7 +127,23 @@ public class doubleActivity extends AppCompatActivity {
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
 //        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
+        //设置蓝牙模块并设置可见
+        if (!BA.isEnabled()) {
+            Intent turnOn = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(turnOn, 0);
+            Toast.makeText(getApplicationContext(),"蓝牙打开中"
+                    ,Toast.LENGTH_LONG).show();
+        }
+        else{
+            Toast.makeText(getApplicationContext(),"蓝牙已经打开",
+                    Toast.LENGTH_LONG).show();
+        }
+        Intent getVisible = new Intent(BluetoothAdapter.
+                ACTION_REQUEST_DISCOVERABLE);
+        startActivityForResult(getVisible, 0);
     }
+
+
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -159,5 +196,13 @@ public class doubleActivity extends AppCompatActivity {
     private void delayedHide(int delayMillis) {
         mHideHandler.removeCallbacks(mHideRunnable);
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        BA.disable();
+        Toast.makeText(getApplicationContext(),"蓝牙关闭" ,
+                Toast.LENGTH_LONG).show();
     }
 }
